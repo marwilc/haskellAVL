@@ -32,6 +32,50 @@ izq (Nodo root t1 _) = t1
 der::ArbolAVL t -> ArbolAVL t
 der (Nodo root _ t2) = t2
 
+{-Funcion que retorna el numero de nodos de un ArbolAVL-}
+numNodos::ArbolAVL t -> Int
+numNodos Nulo = 0
+numNodos (Nodo root t1 t2)
+          | esNulo(t1) && esNulo(t2) = 1
+          | esNulo(t1) = numNodos(t2) + 1
+          | esNulo(t2) = numNodos(t1) + 1
+          | not(esNulo(t1) && esNulo(t2)) = numNodos(t1) + numNodos(t2) + 1
+
+{-Funcion que verifica si un nodo es Hoja-}
+esHoja::ArbolAVL t -> Bool
+esHoja Nulo = True
+esHoja (Nodo root t1 t2) = esNulo(t1) && esNulo(t2)
+
+{-Funcion que busca un elemento en el arbol-}
+buscarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
+buscarAVL Nulo x = Nulo
+buscarAVL (Nodo root t1 t2) x
+            | x == root = (Nodo root t1 t2)
+            | x  < root = buscarAVL t1 x
+            | x  > root = buscarAVL t2 x
+
+
+altura::(Ord t) => ArbolAVL t -> Int
+altura Nulo = 0
+altura x
+        | esHoja(x) = 0
+        | not (esNulo(izq(x))) = altura(izq(x)) + 1
+        | not (esNulo(der(x))) = altura(der(x)) + 1
+
+
+{-Funcion que retorna la altura de un arbolAVL-}
+alturaAVL::(Ord t) => ArbolAVL t -> Int
+alturaAVL Nulo = 0
+alturaAVL root
+            | esHoja(root)            = 0
+            | alturaIzq >= alturaDer  = alturaIzq
+            | alturaIzq < alturaDer   = alturaDer
+            where
+                alturaIzq = altura(izq(root)) + 1
+                alturaDer = altura(der(root)) + 1
+
+
+
 {- Funcion que iserta un arbolAVl
 insertarAVL::ArbolAVL t -> t -> ArbolAVL t
 insertarAVL Nulo e = Nodo e Nulo Nulo
