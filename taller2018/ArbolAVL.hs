@@ -66,22 +66,20 @@ altura x
 {-Funcion que retorna la altura de un arbolAVL-}
 alturaAVL::(Ord t) => ArbolAVL t -> Int
 alturaAVL Nulo = 0
-alturaAVL root
-            | esHoja(root)            = 0
+alturaAVL t
+            | esHoja(t)            = 0
             | alturaIzq >= alturaDer  = alturaIzq
             | alturaIzq < alturaDer   = alturaDer
             where
-                alturaIzq = altura(izq(root)) + 1
-                alturaDer = altura(der(root)) + 1
+                alturaIzq = altura(izq(t)) + 1
+                alturaDer = altura(der(t)) + 1
 
 
 
-{- Funcion que iserta un arbolAVl
-insertarAVL::ArbolAVL t -> t -> ArbolAVL t
-insertarAVL Nulo e = Nodo e Nulo Nulo
+{- Funcion que inserta un arbolAVl -}
+insertarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
+insertarAVL Nulo e = crearAVL (Nodo e Nulo Nulo)
 insertarAVL (Nodo root t1 t2) e
-          | root == e = Nodo (root t1 t2)
-          | root  < e = Nodo (root t1 crearAVL(t2 e))
-          | root  > e = Nodo (root crearAVL(t1 e) t2)
-
--}
+              | e == root = crearAVL (Nodo root t1 t2)
+              | e  > root = crearAVL (Nodo root t1 (insertarAVL(t2) e))
+              | e  < root = crearAVL (Nodo root (insertarAVL(t1) e) t2)
