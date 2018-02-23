@@ -76,10 +76,34 @@ alturaAVL t
 
 
 
-{- Funcion que inserta un arbolAVl -}
+{- Funcion que inserta un elemento al arbolAVl -}
 insertarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
 insertarAVL Nulo e = crearAVL (Nodo e Nulo Nulo)
 insertarAVL (Nodo root t1 t2) e
               | e == root = crearAVL (Nodo root t1 t2)
               | e  > root = crearAVL (Nodo root t1 (insertarAVL(t2) e))
               | e  < root = crearAVL (Nodo root (insertarAVL(t1) e) t2)
+
+{-Funcion que inserta un sub arbol avl-}
+insertarSubTreeAVL::(Ord t) => ArbolAVL t -> ArbolAVL t-> ArbolAVL t
+insertarSubTreeAVL Nulo Nulo = Nulo
+insertarSubTreeAVL Nulo (Nodo y yl yr) = (Nodo y yl yr)
+insertarSubTreeAVL (Nodo x xl xr) Nulo = (Nodo x xl xr)
+insertarSubTreeAVL (Nodo x xl xr) (Nodo y yl yr)
+            | y == x = (Nodo x xl xr)
+            | y  > x = (Nodo x xl (insertarSubTreeAVL xr (Nodo y yl yr)))
+            | y  < x = (Nodo x (insertarSubTreeAVL xl (Nodo y yl yr)) xr )
+
+{- Funcion que elimina un elemento del arbolAVl -}
+eliminarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
+eliminarAVL Nulo e = Nulo
+eliminarAVL (Nodo root t1 t2) e
+              | e == root = destroy(Nodo root t1 t2)
+              | e  > root = (Nodo root t1 (eliminarAVL t2 e))
+              | e  < root = (Nodo root (eliminarAVL t1 e) t2)
+
+              where
+                destroy (Nodo x Nulo Nulo) = Nulo
+                destroy (Nodo x Nulo r) = r
+                destroy (Nodo x l Nulo) = l
+                destroy (Nodo x l r) = (Nodo (raiz l) (izq l) (insertarSubTreeAVL r (der l)))
