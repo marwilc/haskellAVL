@@ -3,9 +3,9 @@
 -- 11/02/2018 -}
 
 {- Modulo arbol AVL mas sus funciones predeterminadas-}
-module ArbolAVL(ArbolAVL(Nulo, Nodo), nulo, esNulo, crearAVL, raiz, izq{-, der, numNodos, esHoja, insertarAVL, eliminarAVL, buscarAVL, alturaAVL, balancear-})
+module ArbolAVL(ArbolAVL(Nulo, Nodo), nulo, esNulo, crearAVL, raiz, izq, der, numNodos, esHoja, insertarAVL, eliminarAVL, buscarAVL, alturaAVL, {-balancear-})
 where -- en el modulo se especifican dos estructuras una esructura Nulo (Arbol Nulo) y un Nodo con dos sub arboles.
-data ArbolAVL t = Nulo | Nodo t (ArbolAVL t) (ArbolAVL t) deriving (Show)
+data ArbolAVL t = Nulo | Nodo t (ArbolAVL t) (ArbolAVL t) Int deriving (Show)
 
 {- Crea un Arbol Nulo -}
 nulo::ArbolAVL t -> ArbolAVL t
@@ -18,92 +18,86 @@ esNulo _ = False
 
 {-Crear AVL a partir de una lista de elementos -}
 crearAVL::ArbolAVL t -> ArbolAVL t
-crearAVL (Nodo e t1 t2) = Nodo e t1 t2
+crearAVL (Nodo root lt rt hight) = Nodo root lt rt hight
 
 {-Funcion que devuelve la raiz de un arbol-}
 raiz::ArbolAVL t -> t
-raiz (Nodo root t1 t2) = root
+raiz (Nodo root _ _ _) = root
 
 {-Funcion que obtiene el hijo izquierdo de un arbolAVl-}
 izq::ArbolAVL t -> ArbolAVL t
-izq (Nodo root t1 _) = t1
+izq (Nodo _ lt _ _) = lt
 
 {-Funcion que obtiene el hijo derecho de un arbolAVl-}
 der::ArbolAVL t -> ArbolAVL t
-der (Nodo root _ t2) = t2
+der (Nodo _ _ rt _) = rt
 
 {-Funcion que retorna el numero de nodos de un ArbolAVL-}
 numNodos::ArbolAVL t -> Int
 numNodos Nulo = 0
-numNodos (Nodo root t1 t2)
-          | esNulo(t1) && esNulo(t2) = 1
-          | esNulo(t1) = numNodos(t2) + 1
-          | esNulo(t2) = numNodos(t1) + 1
-          | not(esNulo(t1) && esNulo(t2)) = numNodos(t1) + numNodos(t2) + 1
+numNodos (Nodo root lt rt _)
+          | esNulo(lt) && esNulo(rt) = 1
+          | esNulo(lt) = numNodos(rt) + 1
+          | esNulo(rt) = numNodos(lt) + 1
+          | not(esNulo(lt) && esNulo(rt)) = numNodos(lt) + numNodos(rt) + 1
 
 {-Funcion que verifica si un nodo es Hoja-}
 esHoja::ArbolAVL t -> Bool
 esHoja Nulo = True
-esHoja (Nodo root t1 t2) = esNulo(t1) && esNulo(t2)
+esHoja (Nodo root lt rt _) = esNulo(lt) && esNulo(rt)
 
 {-Funcion que busca un elemento en el arbol-}
 buscarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
 buscarAVL Nulo x = Nulo
-buscarAVL (Nodo root t1 t2) x
-            | x == root = (Nodo root t1 t2)
-            | x  < root = buscarAVL t1 x
-            | x  > root = buscarAVL t2 x
-
-
-altura::(Ord t) => ArbolAVL t -> Int
-altura Nulo = 0
-altura x
-        | esHoja(x) = 0
-        | not (esNulo(izq(x))) = altura(izq(x)) + 1
-        | not (esNulo(der(x))) = altura(der(x)) + 1
+buscarAVL (Nodo root lt rt hight) x
+            | x == root = (Nodo root lt rt hight)
+            | x  < root = buscarAVL lt x
+            | x  > root = buscarAVL rt x
 
 
 {-Funcion que retorna la altura de un arbolAVL-}
 alturaAVL::(Ord t) => ArbolAVL t -> Int
 alturaAVL Nulo = 0
-alturaAVL t
-            | esHoja(t)            = 0
-            | alturaIzq >= alturaDer  = alturaIzq
-            | alturaIzq < alturaDer   = alturaDer
+alturaAVL (Nodo _ Nulo Nulo _) = 0
+alturaAVL (Nodo root lt rt _) = max (altura lt 1) (altura rt 1)
             where
-                alturaIzq = altura(izq(t)) + 1
-                alturaDer = altura(der(t)) + 1
-
-
+                altura Nulo _ = 0
+                altura t h
+                  | esHoja t = h
+                  | not (esNulo (izq t)) = altura (izq t) (h + 1)
+                  | not (esNulo (der t)) = altura (der t) (h + 1)
 
 {- Funcion que inserta un elemento al arbolAVl -}
 insertarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
-insertarAVL Nulo e = crearAVL (Nodo e Nulo Nulo)
-insertarAVL (Nodo root t1 t2) e
-              | e == root = crearAVL (Nodo root t1 t2)
-              | e  > root = crearAVL (Nodo root t1 (insertarAVL(t2) e))
-              | e  < root = crearAVL (Nodo root (insertarAVL(t1) e) t2)
+insertarAVL Nulo e = Nodo e Nulo Nulo 0
+insertarAVL (Nodo root lt rt hight) e
+              | e == root = (Nodo root lt rt hight)
+              | e  > root = (Nodo root lt (insertarAVL(rt) e) hight)
+              | e  < root = (Nodo root (insertarAVL(lt) e) rt hight)
+
 
 {-Funcion que inserta un sub arbol avl-}
 insertarSubTreeAVL::(Ord t) => ArbolAVL t -> ArbolAVL t-> ArbolAVL t
 insertarSubTreeAVL Nulo Nulo = Nulo
-insertarSubTreeAVL Nulo (Nodo y yl yr) = (Nodo y yl yr)
-insertarSubTreeAVL (Nodo x xl xr) Nulo = (Nodo x xl xr)
-insertarSubTreeAVL (Nodo x xl xr) (Nodo y yl yr)
-            | y == x = (Nodo x xl xr)
-            | y  > x = (Nodo x xl (insertarSubTreeAVL xr (Nodo y yl yr)))
-            | y  < x = (Nodo x (insertarSubTreeAVL xl (Nodo y yl yr)) xr )
+insertarSubTreeAVL Nulo (Nodo rooty ly ry highty) = (Nodo rooty ly ry highty)
+insertarSubTreeAVL (Nodo rootx lx rx hightx) Nulo = (Nodo rootx lx rx hightx)
+insertarSubTreeAVL (Nodo rootx lx rx hightx) (Nodo rooty ly ry highty)
+            | rooty == rootx = (Nodo rootx lx rx hightx)
+            | rooty  > rootx = (Nodo rootx lx (insertarSubTreeAVL rx (Nodo rooty ly ry highty)) sumHight)
+            | rooty  < rootx = (Nodo rootx (insertarSubTreeAVL lx (Nodo rooty ly ry highty)) rx sumHight )
+            where
+              sumHight = hightx + highty
 
 {- Funcion que elimina un elemento del arbolAVl -}
 eliminarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
 eliminarAVL Nulo e = Nulo
-eliminarAVL (Nodo root t1 t2) e
-              | e == root = destroy(Nodo root t1 t2)
-              | e  > root = (Nodo root t1 (eliminarAVL t2 e))
-              | e  < root = (Nodo root (eliminarAVL t1 e) t2)
+eliminarAVL (Nodo root lt rt hight) e
+              | e == root = destroy(Nodo root lt rt hight)
+              | e  > root = (Nodo root lt (eliminarAVL rt e) hight)
+              | e  < root = (Nodo root (eliminarAVL lt e) rt hight)
 
               where
-                destroy (Nodo x Nulo Nulo) = Nulo
-                destroy (Nodo x Nulo r) = r
-                destroy (Nodo x l Nulo) = l
-                destroy (Nodo x l r) = (Nodo (raiz l) (izq l) (insertarSubTreeAVL r (der l)))
+                destroy (Nodo _ Nulo Nulo _) = Nulo
+                destroy (Nodo _ Nulo r _) = r
+                destroy (Nodo _ l Nulo _) = l
+                destroy (Nodo _ l r hight) = (Nodo (raiz l) (izq l) (insertarSubTreeAVL r (der l)) hight)
