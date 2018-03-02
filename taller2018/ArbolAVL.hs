@@ -3,7 +3,7 @@
 -- 11/02/2018 -}
 
 {- Modulo arbol AVL mas sus funciones predeterminadas-}
-module ArbolAVL(ArbolAVL(Nulo, Nodo), nulo, esNulo, crearAVL, raiz, izq, der, numNodos, esHoja, insertarAVL, eliminarAVL, buscarAVL, alturaAVL, {-balancear-})
+module ArbolAVL(ArbolAVL(Nulo, Nodo), nulo, esNulo, crearAVL, raiz, izq, der, numNodos, esHoja, insertarAVL, eliminarAVL, buscarAVL, alturaAVL, balancear)
 where -- en el modulo se especifican dos estructuras una esructura Nulo (Arbol Nulo) y un Nodo con dos sub arboles.
 data ArbolAVL t = Nulo | Nodo t (ArbolAVL t) (ArbolAVL t) Int deriving (Show)
 
@@ -101,3 +101,15 @@ eliminarAVL (Nodo root lt rt hight) e
                 destroy (Nodo _ Nulo r _) = r
                 destroy (Nodo _ l Nulo _) = l
                 destroy (Nodo _ l r hight) = (Nodo (raiz l) (izq l) (insertarSubTreeAVL r (der l)) hight)
+
+{-Funcion que balancea el arbol avl-}
+balancear:: (Ord t) => ArbolAVL t -> ArbolAVL t
+balancear Nulo = Nulo
+balancear (Nodo root Nulo Nulo h) = Nodo root Nulo Nulo h
+balancear (Nodo root lt rt h)
+            | (alturaIzq - alturaDer) == 2  = balancearNodo(lt)
+            | (alturaIzq - alturaDer) == -2 = balancearNodo(rt)
+            | otherwise = 
+            where
+              alturaIzq = alturaAVL lt
+              alturaDer = alturaAVL rt
