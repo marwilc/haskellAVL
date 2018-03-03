@@ -17,8 +17,12 @@ esNulo Nulo = True
 esNulo _ = False
 
 {-Crear AVL a partir de una lista de elementos -}
-crearAVL::ArbolAVL t -> ArbolAVL t
-crearAVL (Nodo root lt rt hight) = Nodo root lt rt hight
+crearAVL::(Ord t) => [t] -> ArbolAVL t
+crearAVL [] = Nulo
+crearAVL (x:y) = crear (Nodo x Nulo Nulo 0) y
+                  where
+                      crear tree [] = tree
+                      crear tree (x:y) = crear (balancear (insertarAVL tree x)) y
 
 {-Funcion que devuelve la raiz de un arbol-}
 raiz::ArbolAVL t -> t
@@ -54,11 +58,9 @@ buscarAVL (Nodo root lt rt hight) x
             | x  < root = buscarAVL lt x
             | x  > root = buscarAVL rt x
 
-
 {-Funcion que retorna la altura de un arbolAVL-}
 alturaAVL::(Ord t) => ArbolAVL t -> Int
-alturaAVL Nulo = 0
-alturaAVL (Nodo _ Nulo Nulo _) = 0
+alturaAVL Nulo = -1
 alturaAVL (Nodo root lt rt _) = max (altura lt 1) (altura rt 1)
             where
                 altura Nulo _ = 0
@@ -74,7 +76,6 @@ insertarAVL (Nodo root lt rt hight) e
               | e == root = (Nodo root lt rt hight)
               | e  > root = (Nodo root lt (insertarAVL(rt) e) hight)
               | e  < root = (Nodo root (insertarAVL(lt) e) rt hight)
-
 
 {-Funcion que inserta un sub arbol avl-}
 insertarSubTreeAVL::(Ord t) => ArbolAVL t -> ArbolAVL t-> ArbolAVL t
@@ -92,24 +93,26 @@ insertarSubTreeAVL (Nodo rootx lx rx hightx) (Nodo rooty ly ry highty)
 eliminarAVL::(Ord t) => ArbolAVL t -> t -> ArbolAVL t
 eliminarAVL Nulo e = Nulo
 eliminarAVL (Nodo root lt rt hight) e
-              | e == root = destroy(Nodo root lt rt hight)
+              | e == root = Nulo
               | e  > root = (Nodo root lt (eliminarAVL rt e) hight)
               | e  < root = (Nodo root (eliminarAVL lt e) rt hight)
-
-              where
-                destroy (Nodo _ Nulo Nulo _) = Nulo
-                destroy (Nodo _ Nulo r _) = r
-                destroy (Nodo _ l Nulo _) = l
-                destroy (Nodo _ l r hight) = (Nodo (raiz l) (izq l) (insertarSubTreeAVL r (der l)) hight)
 
 {-Funcion que balancea el arbol avl-}
 balancear:: (Ord t) => ArbolAVL t -> ArbolAVL t
 balancear Nulo = Nulo
 balancear (Nodo root Nulo Nulo h) = Nodo root Nulo Nulo h
 balancear (Nodo root lt rt h)
-            | (alturaIzq - alturaDer) == 2  = balancearNodo(lt)
-            | (alturaIzq - alturaDer) == -2 = balancearNodo(rt)
-            | otherwise = 
+            | abs (caso) < 2 = Nodo root lt rt h
+            | caso ==  2 &&  subLt == -1 = (Nodo (raiz (der lt)) (eliminarAVL lt (raiz (der lt))) (Nodo root (der(der lt)) rt h) h) -- rotacion doble de izquierda a derecha
+            | caso == -2 &&  subRt ==  1 = (Nodo (raiz (izq rt)) (Nodo root lt (izq(izq rt)) h) (eliminarAVL rt (raiz(izq rt))) h) -- rotacion doble de derecha a izquierda
+            | caso ==  2 &&  subLt /= -1 = (Nodo (raiz lt) (izq lt) (Nodo root (der lt) rt h) h)  -- rotacion simple hacia la derecha
+            | caso == -2 &&  subRt /=  1 = (Nodo (raiz rt) (Nodo root lt (izq rt) h) (der rt) h)  -- rotacion simple hacia la izquierda
+
             where
-              alturaIzq = alturaAVL lt
-              alturaDer = alturaAVL rt
+              caso  = diferencia(Nodo root lt rt h)
+              subLt = diferencia(lt)
+              subRt = diferencia(rt)
+
+diferencia ::(Ord t) => ArbolAVL t -> Int
+diferencia Nulo = 0
+diferencia (Nodo root lt rt h) = (alturaAVL lt) - (alturaAVL rt)
