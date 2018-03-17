@@ -113,6 +113,7 @@ balancear (Nodo root lt rt h)
               subLt = diferencia(lt)
               subRt = diferencia(rt)
 
+{-hace la diferencia de las alturas de los hijos del arbol-}
 diferencia ::(Ord t) => ArbolAVL t -> Int
 diferencia Nulo = 0
 diferencia (Nodo root lt rt h) = (alturaAVL lt) - (alturaAVL rt)
